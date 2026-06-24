@@ -5,7 +5,7 @@ namespace EasyMemory.Pointers;
 public abstract class Pointer
 {
     protected readonly Memory memory;
-    protected readonly IntPtr baseAddress; 
+    protected readonly IntPtr baseAddress;
     protected readonly int[] offsets;
 
     public Pointer(Memory mem, IntPtr absoluteAddress)
@@ -27,43 +27,25 @@ public abstract class Pointer
         baseAddress = IntPtr.Add(moduleBase, staticOffset);
     }
 
-    public IntPtr CurrentAddress
-    {
-        get
-        {
-            try
-            {
-                return ResolveAddress();
-            }
-            catch
-            {
-                return IntPtr.Zero;
-            }
-        }
-    }
+    public Memory MemoryHandle => memory;
+
+    public IntPtr CurrentAddress { get { try { return ResolveAddress(); } catch { return IntPtr.Zero; }} }
 
     public bool IsValid => CurrentAddress != IntPtr.Zero;
 
     private IntPtr ResolveAddress()
     {
-        if (baseAddress == IntPtr.Zero || offsets == null)
-            return IntPtr.Zero;
+        if (baseAddress == IntPtr.Zero || offsets == null || offsets.Length == 0)
+            return baseAddress;
 
         IntPtr currentPtr = baseAddress;
-
         for (int i = 0; i < offsets.Length; i++)
         {
-            if (i == offsets.Length - 1)
-            {
-                return IntPtr.Add(currentPtr, offsets[i]);
-            }
-
             long ptrValue = memory.ReadValue<long>(currentPtr);
-            if (ptrValue == 0) return IntPtr.Zero;
-
+            if (ptrValue == 0)
+                return IntPtr.Zero;
             currentPtr = new IntPtr(ptrValue + offsets[i]);
         }
-
         return currentPtr;
     }
 }

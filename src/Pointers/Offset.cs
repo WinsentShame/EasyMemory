@@ -12,20 +12,14 @@ public abstract class Offset<T> where T : Pointer
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         this.offset = offset;
+        this.memory = parent.MemoryHandle;
     }
 
-    protected IntPtr Address
-    {
-        get
-        {
-            if (!parent.IsValid)
-                return IntPtr.Zero;
+    protected IntPtr Address => IntPtr.Add(BaseAddress, offset);
 
-            return IntPtr.Add(parent.CurrentAddress, offset);
-        }
-    }
+    protected IntPtr BaseAddress => parent.CurrentAddress;
 
     protected bool IsValid => parent.IsValid;
 
-    public Memory MemoryHandle => memory;
+    protected Memory Memory => memory;
 }
